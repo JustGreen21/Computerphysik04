@@ -1,7 +1,7 @@
 ---
-title: 'Übung 03: Pandemieausbruch'
+title: 'Übung 04: Das Torkeln des Marsmondes Phobos'
 author: "Tobias Blesgen und Leonardo Thome"
-date: "09.06.2021"
+date: "23.06.2021"
 output:
   pdf_document: default
   html_document:
@@ -17,8 +17,38 @@ header-includes:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Im Folgenden wollen wir eine simulierte Pandemieausbreitung von SARS-CoV-2 für verschiedene Parameter im SIR Modell betrachten.
-Das SIR  Modell beschreibt den zeitlichen Verlauf mit folgendem Differentialgleichungssystem:
+Im Folgenden wollen das Torkeln des Marsmondes Phobos untersuchen, welches durch die Ellipsoide form des Modes und der elliptischen Umlaufbahn um den Mars entsteht.
+\\
+Dazu beschreiben wir die Situation wie folgt.
+Wir nehmen an, dass der Mond Phobos den Mars auf einer festen elliptischen Bahn mit Radius $r(t)$, Polarwinkel $\Phi(t)$, großer Halbache $a$ und Exzentrizität $\epsilon$ in der Umlaufzeit $T$ umkreist.
+Die Eigenbewegung von Phobos wird durch den Winkel $\theta(t)$ beschrieben, mit den drei Trägheitsmomenten $I_1 < I_2 < I_3$ von Phobos kann die bewegungsgleichung für die Eigenbewegung wie folgt beschrieben werden:
+
+\begin{equation}
+      I_3 \ddot\theta(t) = -\frac{3}{2} (\frac{2\pi}{T})^2 (I_2-I_1)(\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
+\end{equation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \begin{equation}
       S'(t) = -\frac{\beta}{N}S(t)I(t) -\Gamma(t)+ \delta V(t)
 \end{equation}
