@@ -20,51 +20,42 @@ knitr::opts_chunk$set(echo = TRUE)
 Im Folgenden wollen das Torkeln des Marsmondes Phobos untersuchen, welches durch die Ellipsoide form des Modes und der elliptischen Umlaufbahn um den Mars entsteht.
 \\
 Dazu beschreiben wir die Situation wie folgt.
-Wir nehmen an, dass der Mond Phobos den Mars auf einer festen elliptischen Bahn mit Radius $r(t)$, Polarwinkel $\Phi(t)$, großer Halbache $a$ und Exzentrizität $\epsilon$ in der Umlaufzeit $T$ umkreist.
+Wir nehmen an, dass der Mond Phobos den Mars auf einer festen elliptischen Bahn mit Radius $r(t)$, Polarwinkel $\phi(t)$, großer Halbache $a$ und Exzentrizität $\epsilon$ in der Umlaufzeit $T$ umkreist.
 Die Eigenbewegung von Phobos wird durch den Winkel $\theta(t)$ beschrieben, mit den drei Trägheitsmomenten $I_1 < I_2 < I_3$ von Phobos kann die bewegungsgleichung für die Eigenbewegung wie folgt beschrieben werden:
 
 \begin{equation}
       I_3 \ddot\theta(t) = -\frac{3}{2} (\frac{2\pi}{T})^2 (I_2-I_1)(\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Mit der größe $\alpha= \sqrt{3\frac{I_2-I_1}{I_3}} $ vereinfachen wir die Gleichung zu:
 
 \begin{equation}
-      S'(t) = -\frac{\beta}{N}S(t)I(t) -\Gamma(t)+ \delta V(t)
+      \ddot\theta(t) = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (I_2-I_1)(\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
 
+Da $r(t)$ und $\phi(t)$ selbst Zeitabhängig sind müssen wir erst diese Lösen um $\theta(t)$ lösen zu können.
+
+Nach den Kepplerschengesetzen erhalten wir die Beziehung:
 \begin{equation}
-      I'(t) = \frac{\beta}{N}S(t)I(t) -\alpha I(t)
+      r(\phi) = \frac{p}{1+\epsilon \cos{\phi}}
+\end{equation}
+Mit dem Drehimpuls und der Drehimpulserhaltung:
+\begin{equation}
+      L = m r(\phi)^2 * \dot \phi = const
+\end{equation}
+Damit können wir ein Bewegungsgleichung für $\phi$ finden und durch das lösen sowohl die Zeitentwicklung für $\phi$ und $r$ finden.
+\begin{equation}
+      \dot \phi = \frac{L}{m p} (1 + 2\epsilon \cos{\phi} + \epsilon^2 \cos{\phi}^2)
 \end{equation}
 
-\begin{equation}
-      R'(t) = \alpha I(t)
-\end{equation}
+So wollen wir nun vorerst diese zweite Diffenzialgleichung lösen um damit die erste zu lösen.
 
-\begin{equation}
-      V'(t) = \Gamma(t) - \delta V(t)
-\end{equation}
-Hierbei entspricht S der Zahl der noch nicht Infizierten, I der aktuell Kranken, R der Genesenen und V der Geimpften. Wir werden im Verlauf der Simulationen die Geimpftenzahl mit der Anzahl der Personen mit Zweitimpfung gleichsetzen, da ab diesem Punkt der vollständige Schutz eintritt. Des Weiteren ist N die Gesamtbevölkerung, $R_0$ entspricht der Basisreproduktionszahl, $\alpha$ der inversen Infektiositätszeit , $\beta = R_0 * \alpha$, $\Gamma$ die Impfungsrate und $\delta$ die Rate, mit der Geimpfte erkranken.
+GRÖßEN:
+L;
+M;
+P;
+T
+
 
 # Runge-Kutta 2 Verfahren
 
@@ -92,12 +83,12 @@ using namespace Rcpp;
 // Wir verwenden Strukturen, um Funktionsargumente uebersichtlicher zu halten
 typedef struct
 {
-    double S, I, R, V;
+    double phi, r, thetha;
 } Status;
 
 typedef struct
 {
-    double alpha, beta, delta, N, gamma;
+    double kphi,p,epsilon,ktheta ;
 } Parameter;
 
 // Template zum Zerschneiden der verwendeten Vektoren
@@ -113,8 +104,8 @@ std::vector<T> slice(std::vector<T> const &v, int m, int n)
 
 // Berechnungsschritt der Ableitungen nach dem DGS
 void f(Status alterStatus, Parameter parameter, Status& neuerStatus){
-  double Gamma = std::min(parameter.gamma,alterStatus.I);
-    neuerStatus.S = -parameter.beta * alterStatus.S * alterStatus.I/parameter.N 
+
+    neuerStatus.phi = -parameter.beta * alterStatus.S * alterStatus.I/parameter.N 
       - Gamma + parameter.delta * alterStatus.V;
     
     neuerStatus.I = parameter.beta * alterStatus.S * alterStatus.I/parameter.N
