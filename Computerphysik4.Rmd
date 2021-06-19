@@ -201,7 +201,7 @@ e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
 ```
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
-plot(e0$x, phitest$r, "l", col = "dark blue")
+plot(e0$x, e0$r, "l", col = "dark blue")
 #lines(phitest$x, phitest$phi, "l", col = "dark green")
 #legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
 ```
@@ -236,7 +236,7 @@ thetadot = 0.4;
 
 
 #Schrittwahl
-h = 0.01
+h = 0.001
 schritte = 1000000
 
 phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
