@@ -17,38 +17,39 @@ header-includes:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Im Folgenden wollen das Torkeln des Marsmondes Phobos untersuchen, welches durch die Ellipsoide form des Modes und der elliptischen Umlaufbahn um den Mars entsteht.
+Im Folgenden wollen wir das Torkeln des Marsmondes Phobos untersuchen, welches durch die Ellipsoideform des Modes und der elliptischen Umlaufbahn um den Mars entsteht.
 \\
-Dazu beschreiben wir die Situation wie folgt.
-Wir nehmen an, dass der Mond Phobos den Mars auf einer festen elliptischen Bahn mit Radius $r(t)$, Polarwinkel $\phi(t)$, großer Halbache $a$ und Exzentrizität $\epsilon$ in der Umlaufzeit $T$ umkreist.
-Die Eigenbewegung von Phobos wird durch den Winkel $\theta(t)$ beschrieben, mit den drei Trägheitsmomenten $I_1 < I_2 < I_3$ von Phobos kann die bewegungsgleichung für die Eigenbewegung wie folgt beschrieben werden:
+Dazu beschreiben wir die Situation wie folgt:
+
+Wir nehmen an, dass der Mond Phobos den Mars auf einer festen elliptischen Bahn mit Radius $r(t)$, Polarwinkel $\phi(t)$, großen Halbachse $a$ und Exzentrizität $\epsilon$ in der Umlaufzeit $T$ umkreist.
+Die Eigenbewegung von Phobos wird durch den Winkel $\theta(t)$ beschrieben, mit den drei Trägheitsmomenten $I_1 < I_2 < I_3$ von Phobos, kann die Bewegungsgleichung für die Eigenbewegung wie folgt beschrieben werden:
 
 \begin{equation}
       I_3 \ddot\theta(t) = -\frac{3}{2} (\frac{2\pi}{T})^2 (I_2-I_1)(\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
 
-Mit der größe $\alpha= \sqrt{3\frac{I_2-I_1}{I_3}} $ vereinfachen wir die Gleichung zu:
+Mit der Größe $\alpha= \sqrt{3\frac{I_2-I_1}{I_3}}$ vereinfachen  wir die Gleichung zu:
 
 \begin{equation}
-      \ddot\theta(t) = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (I_2-I_1)(\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
+      \ddot\theta(t) = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
 
-Da $r(t)$ und $\phi(t)$ selbst Zeitabhängig sind müssen wir erst diese Lösen um $\theta(t)$ lösen zu können.
+Da $r(t)$ und $\phi(t)$ selbst zeitabhängig sind, müssen wir erst diese lösen, um  die Lösen zu $\theta(t)$ finden zu können.
 
-Nach den Kepplerschengesetzen erhalten wir die Beziehung:
+Nach den Keplerschen Gesetzen erhalten wir die Beziehung (QUELLE):
 \begin{equation}
       r(\phi) = \frac{p}{1+\epsilon \cos{\phi}} = \frac{a (1-\epsilon^2)}{1+\epsilon \cos{\phi}}
 \end{equation}
-Mit dem Drehimpuls und der Drehimpulserhaltung:
+Und mit dem Drehimpuls und der Drehimpulserhaltung (QUELLE):
 \begin{equation}
       L = m r(\phi)^2 * \dot \phi = const
 \end{equation}
-Damit können wir ein Bewegungsgleichung für $\phi$ finden und durch das lösen sowohl die Zeitentwicklung für $\phi$ und $r$(in einheiten von a) finden.
+Somit können wir eine Bewegungsgleichung für $\phi$ finden und durch das Lösen sowohl die Zeitentwicklung für $\phi$ und $r$ (in einheiten von a) finden.
 \begin{equation}
       \dot \phi = \frac{L}{m} \frac{(1 + 2\epsilon \cos{\phi} + \epsilon^2 \cos{\phi}^2)}{(1-\epsilon^2)^2}
 \end{equation}
 
-So wollen wir nun vorerst diese zweite Diffenzialgleichung lösen um damit die erste zu lösen.
+So wollen wir nun vorerst diese zweite Diffenzialgleichung lösen um damit die Erste zu lösen.
 
 GRÖßEN:
 L;
