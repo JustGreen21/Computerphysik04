@@ -33,6 +33,13 @@ Mit der Größe $\alpha= \sqrt{3\frac{I_2-I_1}{I_3}}$ vereinfachen  wir die Glei
 \begin{equation}
       \ddot\theta(t) = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
+Dabei lässt sich die Differentialgleichung 2.Ordnung auch als 2 Differentialgleichungen 1.Ordnung schreiben:
+\begin{equation}
+      \frac{\mathrm{d} \theta(t)}{\mathrm{d} t} = \dot \theta
+\end{equation}
+\begin{equation}
+      \frac{\mathrm{d}  \dot\theta(t)}{\mathrm{d} t} = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
+\end{equation}
 
 Da $r(t)$ und $\phi(t)$ selbst zeitabhängig sind, müssen wir erst diese lösen, um  die Lösen zu $\theta(t)$ finden zu können.
 
@@ -40,35 +47,48 @@ Nach den Keplerschen Gesetzen erhalten wir die Beziehung (QUELLE):
 \begin{equation}
       r(\phi) = \frac{p}{1+\epsilon \cos{\phi}} = \frac{a (1-\epsilon^2)}{1+\epsilon \cos{\phi}}
 \end{equation}
-Und mit dem Drehimpuls und der Drehimpulserhaltung (QUELLE):
+und für die Ableitung nach dem Winkel:
 \begin{equation}
-      L = m r(\phi)^2 * \dot \phi = const
+      \frac{\partial r(\phi)}{\partial \phi} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}
 \end{equation}
-Somit können wir eine Bewegungsgleichung für $\phi$ finden und durch das Lösen sowohl die Zeitentwicklung für $\phi$ und $r$ (in einheiten von a) finden.
+Aus der Drehimpulserhaltung können wir folgern(QUELLE):
+\begin{align}
+      L &= m r^2 * \dot \phi = const
+      \leftrightarrow{\dot \phi} &= \frac{L}{M}\frac{1}{r^2}
+\end{align}
+Für die zeitliche Ableitung von $r$  ergibt sich mithilfe der Gleichungen (6) \& (8):
+
 \begin{equation}
-      \dot \phi = \frac{L}{m} \frac{(1 + 2\epsilon \cos{\phi} + \epsilon^2 \cos{\phi}^2)}{(1-\epsilon^2)^2}
+      \dot r = \frac{\partial r}{\partial \phi}\frac{\partial \phi}{\partial \t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
 \end{equation}
 
-So wollen wir nun vorerst diese zweite Diffenzialgleichung lösen um damit die Erste zu lösen.
+Mit den 4 Differntialgleichung können wir nun $\theta(t)$ und $\dot \theta(t)$ bestimmen ($r$ ist dabei in Einheiten von a).
 
-GRÖßEN:
-L;
-M;
-T
+\begin{equation}
+      \frac{\mathrm{d} \phi}{\mathrm{d} t} = \frac{L}{M}\frac{1}{r^2}
+\end{equation}
+\begin{equation}
+      \frac{\mathrm{d} r}{\mathrm{d} t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
+\end{equation}
+\begin{equation}
+      \frac{\mathrm{d} \theta(t)}{\mathrm{d} t} = \dot \theta
+\end{equation}
+\begin{equation}
+      \frac{\mathrm{d}  \dot\theta(t)}{\mathrm{d} t} = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
+\end{equation}
 
 
 # Runge-Kutta 2 Verfahren
 
-Um die differenziellen Gleichungssysteme auszuwerten, verwenden wir das Runge-Kutta Verfahren nach
+Um das Differentialgleichungssysteme auszuwerten, verwenden wir das Runge-Kutta Verfahren nach
 
 \begin{equation}
   x_{i+1} = x_i + \frac{h}{2}[f(t_i, x_i) + f(t_i+h, x_i+h f(t_i,x_i))].
 \end{equation}
 
-Wobei sich unser f aus den vier Anteilen von S, I, R und V zusammensetzt. Wir werden die Auswirkungen der Schrittweite am Ende der Auswertung genauer betrachten.
+Wobei sich unser f aus den vier Anteilen von $\phi$, $r$, $\theta$ und $\dot \theta$ zusammensetzt.
 
-Vorerst wählen wir die Schrittweite h = 1, da dies direkt den Tagen entspricht.
-Dabei bietet uns das Runge-Kutter Verfahren numerische Stabilität und weist mit einem Verfahrensfehler von $\mathcal{O}(h^2)$ einen kleineren Fehler als das Eulerverfahren auf.
+Dabei bietet uns das Runge-Kutter Verfahren numerische Stabilität (soweit das System selbst Stabile ist) und weist mit einem Verfahrensfehler von $\mathcal{O}(h^2)$ einen kleineren Fehler als das Eulerverfahren auf bei keinen Schrittweiten h.
 
 # Implementation des DGS nach dem Runge-Kutta 2 Verfahren
 
@@ -156,6 +176,7 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
       rWerte[i] = status.r;
       rkSchritt(status, parameter, h);
       
+      // theta und thetadot Aufnahme nach jeder Umrundung
       if(status.phi >= 2*3.14159*k){
         k++;
         thetaWerte[i] = status.theta;
@@ -237,7 +258,7 @@ thetadot = 0.4;
 
 #Schrittwahl
 h = 0.001
-schritte = 1000000
+schritte = 10000000
 
 phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
 ```
