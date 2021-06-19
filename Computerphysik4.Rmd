@@ -83,7 +83,7 @@ using namespace Rcpp;
 // Wir verwenden Strukturen, um Funktionsargumente uebersichtlicher zu halten
 typedef struct
 {
-    double phi, r, theta;
+    double phi, r, theta,thetadot;
 } Status;
 
 typedef struct
@@ -105,7 +105,16 @@ std::vector<T> slice(std::vector<T> const &v, int m, int n)
 // Berechnungsschritt der Ableitungen nach dem DGS
 void f(Status alterStatus, Parameter parameter, Status& neuerStatus){
 
-    neuerStatus.phi = parameter.LM*(1+2*parameter.epsilon*cos(alterStatus.phi)+parameter.epsilon*parameter.epsilon*cos(alterStatus.phi)*cos(alterStatus.phi))/((1-parameter.epsilon*parameter.epsilon)*(1-parameter.epsilon*parameter.epsilon));
+    neuerStatus.r = parameter.LM*(1-parameter.epsilon*parameter.epsilon)*parameter.epsilon*sin(alterStatus.phi)/(alterStatus.r*alterStatus.r*(1+parameter.epsilon*cos(alterStatus.phi))*(1+parameter.epsilon*cos(alterStatus.phi)));
+                                                                                                                                               
+    neuerStatus.phi = parameter.LM/(alterStatus.r*alterStatus.r);
+    
+    neuerStatus.theta = alterStatus.thetadot;
+    
+    neuerStatus.thetadot = parameter.ktheta*sin(2*(alterStatus.theta-alterStatus.phi))/(alterStatus.r*alterStatus.r*alterStatus.r);
+    
+    
+    //neuerStatus.phi = parameter.LM*(1+2*parameter.epsilon*cos(alterStatus.phi)+parameter.epsilon*parameter.epsilon*cos(alterStatus.phi)*cos(alterStatus.phi))/((1-parameter.epsilon*parameter.epsilon)*(1-parameter.epsilon*parameter.epsilon));
     
 }
 
@@ -115,34 +124,43 @@ void rkSchritt(Status& status, Parameter parameter, double h){
     f(status, parameter, fStatus);
     
     Status f2Status;                // Mischterm Ableitung
-    Status gemischt = {.phi = status.phi + h*fStatus.phi};
+    Status gemischt = {.phi = status.phi + h*fStatus.phi,.r = status.r + h*fStatus.r,
+                       .theta = status.theta + h*fStatus.theta,.thetadot = status.thetadot + h*fStatus.thetadot};
     
     f(gemischt, parameter, f2Status);
     status.phi = status.phi + h/2*(fStatus.phi + f2Status.phi);
+    status.r = status.r+ h/2*(fStatus.r + f2Status.r);
+    status.theta = status.theta + h/2*(fStatus.theta + f2Status.theta);
+    status.thetadot = status.thetadot + h/2*(fStatus.thetadot + f2Status.thetadot);
 }
 
 //[[Rcpp::export]]
 Rcpp::List durchlauf(const int maxSchritte, const double h,
                             const double phi, const double r, const double theta,
-                            const double epsilon,const double LM,const double ktheta,
-                            const double x0){
+                            const double thetadot,const double epsilon,const double LM,
+                            const double ktheta,const double x0){
   // Arrays der Werte zur späteren Ausgabe
     std::vector<double> xWerte(maxSchritte);
     std::vector<double> phiWerte(maxSchritte);
     std::vector<double> rWerte(maxSchritte);
+    std::vector<double> thetaWerte(maxSchritte);
+    std::vector<double> thetadotWerte(maxSchritte);
   // Quelltext
-  Status status = {.phi = phi, .r = r, .theta = theta};
+  Status status = {.phi = phi, .r = r, .theta = theta,.thetadot = thetadot};
   Parameter parameter = {.epsilon = epsilon,.LM = LM, .ktheta = ktheta};
   // Schleife bis zur Abbruchsbedingung
     for (int i = 0; i < maxSchritte; i++){
       xWerte[i] = x0 + i*h;
       phiWerte[i] = status.phi;
-      rWerte[i] = (1-parameter.epsilon*parameter.epsilon)/(1+status.phi*parameter.epsilon);
+      rWerte[i] = status.r;
+      thetaWerte[i] = status.theta;
+      thetadotWerte[i] = status.thetadot;
       rkSchritt(status, parameter, h);
     }
     
   // Rückgabe für eine grafische Wiedergabe
-    return List::create(Named("x") = xWerte,Named("phi") = phiWerte,Named("r") = rWerte);
+    return List::create(Named("x") = xWerte,Named("phi") = phiWerte,Named("r") = rWerte,
+                        Named("theta") = thetaWerte,Named("thetadot") = thetadotWerte);
 }
 
 ```
@@ -151,25 +169,30 @@ Test 1 für phi
 ```{r, echo=FALSE}
 #Anfangsbedingungen
 
+epsilon = 0.015;
+alpha = 0.83;
 L = 1;
 m = 1;
-LM = L/m;
-ktheta = 0;
 T = (7*60 + 40)*60;
-epsilon = 0.15;
+LM = L/m;
+ktheta = -1/2*alpha^2*(2*3.14159/T)^3;
+ktheta = 1;
+
+
 x0 = 0;
 
 
 phi = 0;
 r = 1;
-theta = 0;
+theta = 0.5;
+thetadot = 0.5;
 
 
 #Schrittwahl
 h = 0.01
-schritte = 100
+schritte = 10000
 
-phitest = durchlauf(schritte, h, phi, r, theta, epsilon, LM, ktheta, x0)
+phitest = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
 ```
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
@@ -177,7 +200,11 @@ plot(phitest$x, phitest$phi, "l", col = "dark blue")
 lines(phitest$x, phitest$r, "l", col = "dark green")
 #legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
 ```
-
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
+plot(phitest$x, phitest$theta, "l", col = "dark blue")
+lines(phitest$x, phitest$thetadot, "l", col = "dark green")
+#legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
+```
 
 # Fazit
 
