@@ -133,7 +133,6 @@ void rkSchritt(Status& status, Parameter parameter, double h){
     status.theta = status.theta + h/2*(fStatus.theta + f2Status.theta);
     status.thetadot = status.thetadot + h/2*(fStatus.thetadot + f2Status.thetadot);
     }
-}
 
 //[[Rcpp::export]]
 Rcpp::List durchlauf(const int maxSchritte, const double h,
@@ -146,6 +145,7 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
     std::vector<double> rWerte(maxSchritte);
     std::vector<double> thetaWerte(maxSchritte);
     std::vector<double> thetadotWerte(maxSchritte);
+    int k = 0;
   // Quelltext
   Status status = {.phi = phi, .r = r, .theta = theta,.thetadot = thetadot};
   Parameter parameter = {.epsilon = epsilon,.LM = LM, .ktheta = ktheta};
@@ -156,10 +156,11 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
       rWerte[i] = status.r;
       rkSchritt(status, parameter, h);
       
-      if(status.phi >= 2*3.14159 ){
-        status.phi -= 2*3.14159;
+      if(status.phi >= 2*3.14159*k){
+        k++;
         thetaWerte[i] = status.theta;
         thetadotWerte[i] = status.thetadot;
+      }
     }
     
   // Rückgabe für eine grafische Wiedergabe
@@ -169,11 +170,11 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
 
 ```
 
-Test 1 für phi
+Exzentrizität = 0
 ```{r, echo=FALSE}
 #Anfangsbedingungen
 
-epsilon = 0.015;
+epsilon = 0;
 alpha = 0.83;
 L = 1;
 m = 1;
@@ -187,27 +188,69 @@ x0 = 0;
 
 
 phi = 0;
-r = 1;
-theta = 0.5;
-thetadot = 0.5;
+r = 1-epsilon;
+theta = 0;
+thetadot = 0;
 
 
 #Schrittwahl
 h = 0.01
-schritte = 10000
+schritte = 100000
 
-phitest = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
+e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
 ```
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
-plot(phitest$x, phitest$phi, "l", col = "dark blue")
-lines(phitest$x, phitest$r, "l", col = "dark green")
+plot(e0$x, phitest$r, "l", col = "dark blue")
+#lines(phitest$x, phitest$phi, "l", col = "dark green")
 #legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
 ```
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
-plot(phitest$theta, phitest$thetadot, "l", col = "dark blue")
+plot(e0$theta, e0$thetadot, "p", col = "dark blue")
 #legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
 ```
+Phobos
+```{r, echo=FALSE}
+#Anfangsbedingungen
+
+epsilon = 0.015;
+alpha = 0.83;
+x0 = 0;
+phi = 0;
+
+
+
+L = 1;
+m = 1;
+T = (7*60 + 40)*60;
+LM = L/m;
+ktheta = -1/2*alpha^2*(2*3.14159/T)^3;
+ktheta = 1;
+
+
+r = 1-epsilon;
+
+#Vaariation der Anfangsbedingungen
+theta = 0.5;
+thetadot = 0.4;
+
+
+#Schrittwahl
+h = 0.01
+schritte = 1000000
+
+phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
+```
+
+
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
+plot(phobos$theta, phobos$thetadot,"p",xlab = "theta",ylab = "dot theta" , col = "dark blue")
+#legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
+```
+
+
+
+
 
 # Fazit
 
