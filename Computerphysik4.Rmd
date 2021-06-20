@@ -56,7 +56,7 @@ Aus der Drehimpulserhaltung können wir folgern(QUELLE):
       L &= m r^2 * \dot \phi = const
       \leftrightarrow{\dot \phi} &= \frac{L}{M}\frac{1}{r^2}
 \end{align}
-Für die zeitliche Ableitung von $r$  ergibt sich mithilfe der Gleichungen (6) \& (8):
+Für die zeitliche Ableitung von $r$  ergibt sich mithilfe der Gleichungen (?) \& (?):
 
 \begin{equation}
       \dot r = \frac{\partial r}{\partial \phi}\frac{\partial \phi}{\partial \t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
@@ -74,9 +74,10 @@ Mit den 4 Differntialgleichung können wir nun $\theta(t)$ und $\dot \theta(t)$ 
       \frac{\mathrm{d} \theta(t)}{\mathrm{d} t} = \dot \theta
 \end{equation}
 \begin{equation}
-      \frac{\mathrm{d}  \dot\theta(t)}{\mathrm{d} t} = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
+      \frac{\mathrm{d}  \dot\theta(t)}{\mathrm{d} t} = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{1}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
 
+Für die entgültige Implementierung wollen die Differientiallgleichung nach 
 
 # Runge-Kutta 2 Verfahren
 
@@ -103,7 +104,7 @@ using namespace Rcpp;
 // Wir verwenden Strukturen, um Funktionsargumente uebersichtlicher zu halten
 typedef struct
 {
-    double phi, r, theta,thetadot;
+    double phi, r, theta, thetadot;
 } Status;
 
 typedef struct
@@ -132,9 +133,6 @@ void f(Status alterStatus, Parameter parameter, Status& neuerStatus){
     neuerStatus.theta = alterStatus.thetadot;
     
     neuerStatus.thetadot = parameter.ktheta*sin(2*(alterStatus.theta-alterStatus.phi))/(alterStatus.r*alterStatus.r*alterStatus.r);
-    
-    
-    //neuerStatus.phi = parameter.LM*(1+2*parameter.epsilon*cos(alterStatus.phi)+parameter.epsilon*parameter.epsilon*cos(alterStatus.phi)*cos(alterStatus.phi))/((1-parameter.epsilon*parameter.epsilon)*(1-parameter.epsilon*parameter.epsilon));
     
 }
 
@@ -197,19 +195,20 @@ Exzentrizität = 0
 
 epsilon = 0;
 alpha = 0.83;
+x0 = 0;
+phi = 0;
+r = 1-epsilon;
+
+
 L = 0.5;
 m = 1;
-T = (7*60 + 40)*60;
 LM = L/m;
-ktheta = -1/2*alpha^2*(2*3.14159/T)^3;
+
+# Mit der Umformung nach tau.
 ktheta = -1/2*alpha^2;
 
 
-x0 = 0;
-
-
-phi = 0;
-r = 1-epsilon;
+#Vaariation der Anfangsbedingungen
 theta = 0;
 thetadot = 0;
 
