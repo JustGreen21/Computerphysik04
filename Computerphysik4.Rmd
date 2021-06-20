@@ -18,11 +18,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Im Folgenden wollen wir das Torkeln des Marsmondes Phobos untersuchen, welches durch die Ellipsoideform des Modes und der elliptischen Umlaufbahn um den Mars entsteht.
-\\
+
 Dazu beschreiben wir die Situation wie folgt:
 
 Wir nehmen an, dass der Mond Phobos den Mars auf einer festen elliptischen Bahn mit Radius $r(t)$, Polarwinkel $\phi(t)$, großen Halbachse $a$ und Exzentrizität $\epsilon$ in der Umlaufzeit $T$ umkreist.
-Die Eigenbewegung von Phobos wird durch den Winkel $\theta(t)$ beschrieben, mit den drei Trägheitsmomenten $I_1 < I_2 < I_3$ von Phobos, kann die Bewegungsgleichung für die Eigenbewegung wie folgt beschrieben werden:
+Die Eigenbewegung von Phobos wird durch den Winkel $\theta(t)$ beschrieben. Mit den drei Trägheitsmomenten $I_1 < I_2 < I_3$ von Phobos, kann die Bewegungsgleichung für die Eigenbewegung wie folgt geschrieben werden:
 
 \begin{equation}
       I_3 \ddot\theta(t) = -\frac{3}{2} (\frac{2\pi}{T})^2 (I_2-I_1)(\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
@@ -41,25 +41,25 @@ Dabei lässt sich die Differentialgleichung 2.Ordnung auch als 2 Differentialgle
       \frac{\mathrm{d}  \dot\theta(t)}{\mathrm{d} t} = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{a}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
 
-Da $r(t)$ und $\phi(t)$ selbst zeitabhängig sind, müssen wir erst diese lösen, um  die Lösen zu $\theta(t)$ finden zu können.
+Da $r(t)$ und $\phi(t)$ selbst zeitabhängig sind, müssen wir erst diese lösen, um  die Lösung zu $\theta(t)$ finden zu können.
 
 Nach den Keplerschen Gesetzen erhalten wir die Beziehung (QUELLE):
 \begin{equation}
       r(\phi) = \frac{p}{1+\epsilon \cos{\phi}} = \frac{a (1-\epsilon^2)}{1+\epsilon \cos{\phi}}
 \end{equation}
 und für die Ableitung nach dem Winkel:
-\begin{equation}
+\begin{equation} \label{eq:rPunkt}
       \frac{\partial r(\phi)}{\partial \phi} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}
 \end{equation}
-Aus der Drehimpulserhaltung können wir folgern(QUELLE):
+Aus der Drehimpulserhaltung können wir folgern:
 \begin{align}
-      L &= m r^2 * \dot \phi = const
+      L &= M r^2 * \dot \phi = const  \\
       \leftrightarrow{\dot \phi} &= \frac{L}{M}\frac{1}{r^2}
 \end{align}
-Für die zeitliche Ableitung von $r$  ergibt sich mithilfe der Gleichungen (?) \& (?):
+Für die zeitliche Ableitung von $r$ ergibt sich mit Hilfe der Gleichungen (\ref{eq:rPunkt}) \& (?):
 
 \begin{equation}
-      \dot r = \frac{\partial r}{\partial \phi}\frac{\partial \phi}{\partial \t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
+      \dot r = \frac{\partial r}{\partial \phi}\frac{\partial \phi}{\partial t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
 \end{equation}
 
 Mit den 4 Differntialgleichung können wir nun $\theta(t)$ und $\dot \theta(t)$ bestimmen ($r$ ist dabei in Einheiten von a).
@@ -126,13 +126,17 @@ std::vector<T> slice(std::vector<T> const &v, int m, int n)
 // Berechnungsschritt der Ableitungen nach dem DGS
 void f(Status alterStatus, Parameter parameter, Status& neuerStatus){
 
-    neuerStatus.r = parameter.LM*(1-parameter.epsilon*parameter.epsilon)*parameter.epsilon*sin(alterStatus.phi)/(alterStatus.r*alterStatus.r*(1+parameter.epsilon*cos(alterStatus.phi))*(1+parameter.epsilon*cos(alterStatus.phi)));
+  neuerStatus.r = parameter.LM*(1-parameter.epsilon*parameter.epsilon)
+    *parameter.epsilon*sin(alterStatus.phi)/(alterStatus.r*alterStatus.r
+    *(1+parameter.epsilon*cos(alterStatus.phi))*(1+parameter.epsilon
+    *cos(alterStatus.phi)));
                                                                                                                                                
     neuerStatus.phi = parameter.LM/(alterStatus.r*alterStatus.r);
     
     neuerStatus.theta = alterStatus.thetadot;
     
-    neuerStatus.thetadot = parameter.ktheta*sin(2*(alterStatus.theta-alterStatus.phi))/(alterStatus.r*alterStatus.r*alterStatus.r);
+    neuerStatus.thetadot = parameter.ktheta*sin(2*(alterStatus.theta
+      -alterStatus.phi))/(alterStatus.r*alterStatus.r*alterStatus.r);
     
 }
 
@@ -142,21 +146,23 @@ void rkSchritt(Status& status, Parameter parameter, double h){
     f(status, parameter, fStatus);
     
     Status f2Status;                // Mischterm Ableitung
-    Status gemischt = {.phi = status.phi + h*fStatus.phi,.r = status.r + h*fStatus.r,
-                       .theta = status.theta + h*fStatus.theta,.thetadot = status.thetadot + h*fStatus.thetadot};
+    Status gemischt = {.phi=status.phi+h*fStatus.phi,.r = status.r+h*fStatus.r,
+                       .theta = status.theta + h*fStatus.theta,
+                       .thetadot = status.thetadot + h*fStatus.thetadot};
     
     f(gemischt, parameter, f2Status);
     status.phi = status.phi + h/2*(fStatus.phi + f2Status.phi);
     status.r = status.r+ h/2*(fStatus.r + f2Status.r);
     status.theta = status.theta + h/2*(fStatus.theta + f2Status.theta);
-    status.thetadot = status.thetadot + h/2*(fStatus.thetadot + f2Status.thetadot);
+    status.thetadot = status.thetadot+h/2*(fStatus.thetadot+f2Status.thetadot);
     }
 
 //[[Rcpp::export]]
 Rcpp::List durchlauf(const int maxSchritte, const double h,
                             const double phi, const double r, const double theta,
-                            const double thetadot,const double epsilon,const double LM,
-                            const double ktheta,const double x0){
+                            const double thetadot,const double epsilon,
+                            const double LM, const double ktheta,
+                            const double x0){
   // Arrays der Werte zur späteren Ausgabe
     std::vector<double> xWerte(maxSchritte);
     std::vector<double> phiWerte(maxSchritte);
@@ -183,13 +189,14 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
     }
     
   // Rückgabe für eine grafische Wiedergabe
-    return List::create(Named("x") = xWerte,Named("phi") = phiWerte,Named("r") = rWerte,
-                        Named("theta") = thetaWerte,Named("thetadot") = thetadotWerte);
+    return List::create(Named("x") = xWerte, Named("phi") = phiWerte,
+                        Named("r") = rWerte, Named("theta") = thetaWerte,
+                        Named("thetadot") = thetadotWerte);
 }
 
 ```
 
-Exzentrizität = 0
+Für eine Exzentrizität von 0 ergibt sich ein konstanter Radius, siehe Abb. \ref{fig:grundEntwicklung}
 ```{r, echo=FALSE}
 #Anfangsbedingungen
 
@@ -197,7 +204,7 @@ epsilon = 0;
 alpha = 0.83;
 x0 = 0;
 phi = 0;
-r = 1-epsilon;
+r = 1-epsilon^2;
 
 
 L = 0.5;
@@ -225,11 +232,16 @@ plot(e0$x, e0$r, "l", col = "dark blue")
 #lines(phitest$x, phitest$phi, "l", col = "dark green")
 #legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
 ```
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
+
+Wir finden in Abb. \ref{fig:grundEntwicklung2} ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation.
+
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung2} Entwicklungskurven für $R_0 = 2.9$"}
 plot(e0$theta, e0$thetadot, "p", col = "dark blue")
 #legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
 ```
-Phobos
+
+Wir verwenden nun die Werte von Phobos, also $\epsilon = 0,015$ und $\alpha = 0,83$. Wir finden für XYZ in Abb. \ref{fig:grundEntwicklung3} ein chaotisches Verhalten.
+
 ```{r, echo=FALSE}
 #Anfangsbedingungen
 
@@ -247,7 +259,7 @@ LM = L/m;
 ktheta = -1/2*alpha^2*(2*3.14159/T)^3;
 
 
-r = 1-epsilon;
+r = 1-epsilon^2;
 
 #Vaariation der Anfangsbedingungen
 theta = 0.5;
@@ -256,15 +268,16 @@ thetadot = 0.4;
 
 #Schrittwahl
 h = 0.001
-schritte = 100000
+schritte = 1000000
 
-phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
+phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, 
+                   x0)
 ```
 
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
-plot(phobos$theta, phobos$thetadot,"p",xlab = "theta",ylab = "dot theta" , col = "dark blue")
-#legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Entwicklungskurven für $R_0 = 2.9$"}
+plot(phobos$theta, phobos$thetadot,"p",xlab = "theta",ylab = "dot theta" , 
+     col = "dark blue")
 ```
 
 
