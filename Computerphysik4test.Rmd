@@ -59,7 +59,7 @@ Aus der Drehimpulserhaltung können wir folgern(QUELLE):
 Für die zeitliche Ableitung von $r$  ergibt sich mithilfe der Gleichungen (6) \& (8):
 
 \begin{equation}
-      \dot r = \frac{\partial r}{\partial \phi}\frac{\partial \phi}{\partial \t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
+      \dot r = \frac{\partial r}{\partial \phi}\frac{\partial \phi}{\partial t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
 \end{equation}
 
 Mit den 4 Differntialgleichung können wir nun $\theta(t)$ und $\dot \theta(t)$ bestimmen ($r$ ist dabei in Einheiten von a).
@@ -103,12 +103,12 @@ using namespace Rcpp;
 // Wir verwenden Strukturen, um Funktionsargumente uebersichtlicher zu halten
 typedef struct
 {
-    double phi, r, theta,thetadot;
+    double phi,phidot, r, theta,thetadot;
 } Status;
 
 typedef struct
 {
-    double epsilon,LM,ktheta;
+    double epsilon,ktheta;
 } Parameter;
 
 // Template zum Zerschneiden der verwendeten Vektoren
@@ -125,16 +125,15 @@ std::vector<T> slice(std::vector<T> const &v, int m, int n)
 // Berechnungsschritt der Ableitungen nach dem DGS
 void f(Status alterStatus, Parameter parameter, Status& neuerStatus){
 
-    neuerStatus.r = parameter.LM*(1-parameter.epsilon*parameter.epsilon)*parameter.epsilon*sin(alterStatus.phi)/(alterStatus.r*alterStatus.r*(1+parameter.epsilon*cos(alterStatus.phi))*(1+parameter.epsilon*cos(alterStatus.phi)));
-                                                                                                                                               
-    neuerStatus.phi = parameter.LM/(alterStatus.r*alterStatus.r);
     
     neuerStatus.theta = alterStatus.thetadot;
     
     neuerStatus.thetadot = parameter.ktheta*sin(2*(alterStatus.theta-alterStatus.phi))/(alterStatus.r*alterStatus.r*alterStatus.r);
     
+    neuerStatus.phi= alterStatus.phidot;
     
-    //neuerStatus.phi = parameter.LM*(1+2*parameter.epsilon*cos(alterStatus.phi)+parameter.epsilon*parameter.epsilon*cos(alterStatus.phi)*cos(alterStatus.phi))/((1-parameter.epsilon*parameter.epsilon)*(1-parameter.epsilon*parameter.epsilon));
+    neuerStatus.phidot = -2*alterStatus.phidot*alterStatus.phidot*sin(alterStatus.phi)/(1+parameter.epsilon*cos(alterStatus.phi));
+    
     
 }
 
@@ -144,35 +143,40 @@ void rkSchritt(Status& status, Parameter parameter, double h){
     f(status, parameter, fStatus);
     
     Status f2Status;                // Mischterm Ableitung
-    Status gemischt = {.phi = status.phi + h*fStatus.phi,.r = status.r + h*fStatus.r,
+    Status gemischt = {.phi = status.phi + h*fStatus.phi, .phidot = status.phidot + h*fStatus.phidot, .r = status.r + h*fStatus.r,
                        .theta = status.theta + h*fStatus.theta,.thetadot = status.thetadot + h*fStatus.thetadot};
     
     f(gemischt, parameter, f2Status);
+    
     status.phi = status.phi + h/2*(fStatus.phi + f2Status.phi);
-    status.r = status.r+ h/2*(fStatus.r + f2Status.r);
+    status.phidot = status.phidot+ h/2*(fStatus.phidot + f2Status.phidot);
     status.theta = status.theta + h/2*(fStatus.theta + f2Status.theta);
     status.thetadot = status.thetadot + h/2*(fStatus.thetadot + f2Status.thetadot);
+    
+    status.r = (1-parameter.epsilon*parameter.epsilon)/(parameter.epsilon*cos(status.phi));
     }
 
 //[[Rcpp::export]]
 Rcpp::List durchlauf(const int maxSchritte, const double h,
-                            const double phi, const double r, const double theta,
-                            const double thetadot,const double epsilon,const double LM,
+                            const double phi,const double phidot, const double r, const double theta,
+                            const double thetadot,const double epsilon,
                             const double ktheta,const double x0){
   // Arrays der Werte zur späteren Ausgabe
     std::vector<double> xWerte(maxSchritte);
     std::vector<double> phiWerte(maxSchritte);
+    std::vector<double> phidotWerte(maxSchritte);
     std::vector<double> rWerte(maxSchritte);
     std::vector<double> thetaWerte(maxSchritte);
     std::vector<double> thetadotWerte(maxSchritte);
     int k = 0;
   // Quelltext
-  Status status = {.phi = phi, .r = r, .theta = theta,.thetadot = thetadot};
-  Parameter parameter = {.epsilon = epsilon,.LM = LM, .ktheta = ktheta};
+  Status status = {.phi = phi, .phidot = phidot, .r = r, .theta = theta,.thetadot = thetadot};
+  Parameter parameter = {.epsilon = epsilon, .ktheta = ktheta};
   // Schleife bis zur Abbruchsbedingung
     for (int i = 0; i < maxSchritte; i++){
       xWerte[i] = x0 + i*h;
       phiWerte[i] = status.phi;
+      phidotWerte[i] = status.phidot;
       rWerte[i] = status.r;
       rkSchritt(status, parameter, h);
       
@@ -185,7 +189,7 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
     }
     
   // Rückgabe für eine grafische Wiedergabe
-    return List::create(Named("x") = xWerte,Named("phi") = phiWerte,Named("r") = rWerte,
+    return List::create(Named("x") = xWerte,Named("phi") = phiWerte,Named("phidot") = phiWerte,Named("r") = rWerte,
                         Named("theta") = thetaWerte,Named("thetadot") = thetadotWerte);
 }
 
@@ -197,11 +201,11 @@ Exzentrizität = 0
 
 epsilon = 0;
 alpha = 0.83;
-L = 0.5;
+L = 1;
 m = 1;
-T = (7*60 + 40)*60;
+T = 1;
 LM = L/m;
-ktheta = -1/2*alpha^2*(2*3.14159/T)^3;
+ktheta = -1/2*alpha^2*(2*3.14159/T)^2;
 ktheta = -1/2*alpha^2;
 
 
@@ -209,6 +213,7 @@ x0 = 0;
 
 
 phi = 0;
+phidot = 0.01;
 r = 1-epsilon;
 theta = 0;
 thetadot = 0;
@@ -218,7 +223,7 @@ thetadot = 0;
 h = 0.01
 schritte = 100000
 
-e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
+e0 = durchlauf(schritte, h, phi, phidot, r, theta, thetadot, epsilon, ktheta, x0)
 ```
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
@@ -240,26 +245,27 @@ x0 = 0;
 phi = 0;
 
 
+phidot = 1;
 L = 1;
 m = 1;
 T = 1;
 
 LM = L/m;
-ktheta = -1/2*alpha^2*(2*3.14159/T)^3;
+ktheta = -1/2*alpha^2;
 
 
 r = 1-epsilon;
 
 #Vaariation der Anfangsbedingungen
-theta = 0.5;
-thetadot = 0.4;
+theta = 0;
+thetadot = 0.7;
 
 
 #Schrittwahl
 h = 0.001
-schritte = 100000
+schritte = 10000
 
-phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
+phobos = durchlauf(schritte, h, phi, phidot, r, theta, thetadot, epsilon, ktheta, x0)
 ```
 
 
