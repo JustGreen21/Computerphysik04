@@ -236,8 +236,8 @@ plot(e0$x, e0$r, "l", col = "dark blue")
 Wir finden in Abb. \ref{fig:grundEntwicklung2} ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation.
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung2} Entwicklungskurven für $R_0 = 2.9$"}
-plot(e0$theta, e0$thetadot, "p", col = "dark blue")
-#legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
+library(latex2exp)
+plot(e0$theta, e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'))
 ```
 
 Wir verwenden nun die Werte von Phobos, also $\epsilon = 0,015$ und $\alpha = 0,83$. Wir finden für XYZ in Abb. \ref{fig:grundEntwicklung3} ein chaotisches Verhalten.
@@ -268,7 +268,7 @@ thetadot = 0.4;
 
 #Schrittwahl
 h = 0.001
-schritte = 1000000
+schritte = 100000
 
 phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, 
                    x0)
@@ -276,8 +276,8 @@ phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta,
 
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Entwicklungskurven für $R_0 = 2.9$"}
-plot(phobos$theta, phobos$thetadot,"p",xlab = "theta",ylab = "dot theta" , 
-     col = "dark blue")
+library(latex2exp)
+plot(phobos$theta, phobos$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'))
 ```
 
 
