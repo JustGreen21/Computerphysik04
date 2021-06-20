@@ -161,10 +161,8 @@ void rkSchritt(Status& status, Parameter parameter, double h){
 Rcpp::List durchlauf(const int maxSchritte, const double h,
                             const double phi, const double r, const double theta,
                             const double thetadot,const double epsilon,
-                            const double LM, const double ktheta,
-                            const double x0){
+                            const double LM, const double ktheta){
   // Arrays der Werte zur späteren Ausgabe
-    std::vector<double> xWerte(maxSchritte);
     std::vector<double> phiWerte(maxSchritte);
     std::vector<double> rWerte(maxSchritte);
     std::vector<double> thetaWerte(maxSchritte);
@@ -175,7 +173,6 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
   Parameter parameter = {.epsilon = epsilon,.LM = LM, .ktheta = ktheta};
   // Schleife bis zur Abbruchsbedingung
     for (int i = 0; i < maxSchritte; i++){
-      xWerte[i] = x0 + i*h;
       phiWerte[i] = status.phi;
       rWerte[i] = status.r;
       rkSchritt(status, parameter, h);
@@ -183,54 +180,48 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
       // theta und thetadot Aufnahme nach jeder Umrundung
       if(status.phi >= 2*3.14159*k){
         k++;
-        thetaWerte[i] = status.theta;
-        thetadotWerte[i] = status.thetadot;
+        thetaWerte[k] = status.theta;
+        thetadotWerte[k] = status.thetadot;
       }
     }
     
   // Rückgabe für eine grafische Wiedergabe
-    return List::create(Named("x") = xWerte, Named("phi") = phiWerte,
-                        Named("r") = rWerte, Named("theta") = thetaWerte,
-                        Named("thetadot") = thetadotWerte);
+    return List::create(Named("phi") = phiWerte,Named("r") = rWerte,
+                        Named("theta") = slice(thetaWerte,1,k-1),
+                        Named("thetadot") = slice(thetadotWerte,1,k-1));
 }
 
 ```
 
 Für eine Exzentrizität von 0 ergibt sich ein konstanter Radius, siehe Abb. \ref{fig:grundEntwicklung}
 ```{r, echo=FALSE}
-#Anfangsbedingungen
+#Anfangsbedingungen und Konstanten
 
 epsilon = 0;
 alpha = 0.83;
 x0 = 0;
 phi = 0;
 r = 1-epsilon^2;
-
-
-L = 0.5;
-m = 1;
-LM = L/m;
-
 # Mit der Umformung nach tau.
 ktheta = -1/2*alpha^2;
 
 
+#Wählen als Drehimpuls Masse Verhältnis 0,5
+L = 0.5;
+m = 1;
+LM = L/m;
+
+
 #Vaariation der Anfangsbedingungen
 theta = 0;
-thetadot = 0;
+thetadot = 1;
 
 
 #Schrittwahl
-h = 0.01
-schritte = 100000
+h = 0.001
+schritte = 1000000
 
 e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
-```
-
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung} Entwicklungskurven für $R_0 = 2.9$"}
-plot(e0$x, e0$r, "l", col = "dark blue")
-#lines(phitest$x, phitest$phi, "l", col = "dark green")
-#legend(150,6e7,legend=c("S", "I","R"), col = c("dark blue", "green","red"), lty=1:1)
 ```
 
 Wir finden in Abb. \ref{fig:grundEntwicklung2} ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation.
@@ -243,32 +234,28 @@ plot(e0$theta, e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab
 Wir verwenden nun die Werte von Phobos, also $\epsilon = 0,015$ und $\alpha = 0,83$. Wir finden für XYZ in Abb. \ref{fig:grundEntwicklung3} ein chaotisches Verhalten.
 
 ```{r, echo=FALSE}
-#Anfangsbedingungen
-
+#Anfangsbedingungen und Konstanten
 epsilon = 0.015;
 alpha = 0.83;
 x0 = 0;
 phi = 0;
-
-
-L = 1;
-m = 1;
-T = 1;
-
-LM = L/m;
-ktheta = -1/2*alpha^2*(2*3.14159/T)^3;
-
-
 r = 1-epsilon^2;
+ktheta = -1/2*alpha^2;
+
+
+#Wählen als Drehimpuls Masse Verhältnis 0,5
+L = 0.50;
+m = 1;
+LM = L/m;
+
 
 #Vaariation der Anfangsbedingungen
-theta = 0.5;
-thetadot = 0.4;
-
+theta = 0;
+thetadot = 1;
 
 #Schrittwahl
 h = 0.001
-schritte = 100000
+schritte = 1000000
 
 phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, 
                    x0)
@@ -285,6 +272,13 @@ plot(phobos$theta, phobos$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'
 
 
 # Fazit
+Auch wenn wir bei spezifischen Werten Periodisches Verhalten zwischen $\theta$
+und $\dot \theta$ erhalten, wie auch erwartet.
+Jedoch sollte dies nicht wie bei uns gespiegelt. Es scheind das uns eine Fehler bei dem Aufstellen der DGL unterlaufen zu sein,
+den wir nicht finden.
+Wir können aber sehen, dass das bei der Wahl von verschiedenen Anfangsbedingungen chaotisches Verhalten auftritt (siehe Plots).
+
+
 
 
 \begin{thebibliography}{99}
