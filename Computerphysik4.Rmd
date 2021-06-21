@@ -275,9 +275,6 @@ phobos4 = durchlauf(schritte, h, phi, r, theta, thetadot4, epsilon, LM, ktheta)
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Entwicklungskurven für $R_0 = 2.9$"}
 library(latex2exp)
-#jpeg(file="saving_plot9.jpeg")
-
-
 
 plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 0,5,\,\, h=0,0001 $)'))
 lines(phobos2$theta%%(2*pi), phobos2$thetadot,"p", col = "dark red")
@@ -291,15 +288,27 @@ lines(phobos2$theta, phobos2$thetadot,"p", col = "dark red")
 lines(phobos3$theta, phobos3$thetadot,"p", col = "red")
 lines(phobos4$theta, phobos4$thetadot,"p", col = "pink")
 
-#dev.off()
 ```
 
-In Abb. \ref{fig:grundEntwicklung3} können wir sowohl ein periodisches Verhalten, als auch ein chaotisches Verhalten sehen. Offenkundig haben die Startwerte einen deutlichen Einfluss auf das Verhalten des Mondes. Varieren wir den Startwinkel so finden wir allgemein für Vielfache von $\pi$ ein periodisches Verhalten.
+In Abb. \ref{fig:grundEntwicklung3} können wir sowohl ein periodisches Verhalten, als auch ein chaotisches Verhalten sehen. Offenkundig haben die Startwerte einen deutlichen Einfluss auf das Verhalten des Mondes. Für die große Anfangsrotationengeschwindigkeiten erhalten wir die rötlich eingetragenen Ränder, welche im Plot ohne Modulo kaum Struktur tragen. Die sehr kleinen Startrotationen sind hingegen am unteren Rand der Grafik in Sinusformen aufzufinden. Wir habe in Abb \ref{fig:grundEntwicklung4} eine größere Reichweite an Anfangswerten dargestellt um ein Gefühl für die Verteilung zu gewinnen. Das grün gelbliche chaotische Verhalten stellt sich hier bei für $\theta$-Werte in der Größenordnung von 1/7 ein.
+
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung4} Entwicklungskurven für $R_0 = 2.9$"}
+library(latex2exp)
+
+phobos = durchlauf(schritte, h, phi, r, theta, 1, epsilon, LM, ktheta)
+plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 0,5,\,\, h=0,0001 $)'))
+
+for (x in 1:25){
+  phobos = durchlauf(schritte, h, phi, r, theta, 1/x, epsilon, LM, ktheta)
+  lines(phobos$theta%%(2*pi), phobos$thetadot,"p", col = rainbow(25)[x])
+}
+
+```
 
 # Fazit
 Wir erhalten bei spezifischen Werten periodisches Verhalten zwischen $\theta$ und $\dot \theta$. Dies ist im physikalischen Sinne auch nachvollziehbar da in diesen Fällen die Rotationsfrequenz der Eigenrotation über einen rationalen Faktor mit der der Rotation um Mars übereinstimmt.
 
-Wir können aber sehen, dass dieses Verhalten ein Ausnahmefall ist und wir im Allgemeinen ein chaotisches Verhalten vorfinden.
+Wir können aber sehen, dass dieses Verhalten nicht immer eintritt und wir im Allgemeinen ein chaotisches Verhalten vorfinden.
 
 
 \begin{thebibliography}{99}
