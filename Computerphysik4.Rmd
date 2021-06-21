@@ -54,9 +54,9 @@ und für die Ableitung nach dem Winkel:
 Aus der Drehimpulserhaltung können wir folgern:
 \begin{align}
       L &= M r^2 * \dot \phi = const  \\
-      \leftrightarrow{\dot \phi} &= \frac{L}{M}\frac{1}{r^2}
+      \leftrightarrow{\dot \phi} &= \frac{L}{M}\frac{1}{r^2} \label{eq:ZZ}
 \end{align}
-Für die zeitliche Ableitung von $r$ ergibt sich mit Hilfe der Gleichungen (\ref{eq:rPunkt}) \& (?):
+Für die zeitliche Ableitung von $r$ ergibt sich mit Hilfe der Gleichungen (\ref{eq:rPunkt}) \& (\ref{eq:ZZ}):
 
 \begin{equation}
       \dot r = \frac{\partial r}{\partial \phi}\frac{\partial \phi}{\partial t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
@@ -77,7 +77,13 @@ Mit den 4 Differntialgleichung können wir nun $\theta(t)$ und $\dot \theta(t)$ 
       \frac{\mathrm{d}  \dot\theta(t)}{\mathrm{d} t} = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{1}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
 
-Für die entgültige Implementierung wollen die Differientiallgleichung nach 
+Für die Implementierung werden wir $\tilde{r}$ in Einheiten von $a$ und $\tilde{t}$ in Einheiten von $T/2\pi$. Es ergibt sich mit dem der Abschätzung des mittleren Radius von a und einer annähernd runden Kreisbahn für das Drehimpuls-Masse-Verhältnis die Näherung:
+
+\begin{equation}
+\frac{L}{M} \approx \frac{Ma^2\omega}{M} = \frac{2\pi a^2}{T}
+\end{equation}
+
+In den neu eingeführten Einheiten schreibt sich der Drehimpuls also als 1.
 
 # Runge-Kutta 2 Verfahren
 
@@ -207,9 +213,7 @@ ktheta = -1/2*alpha^2;
 
 
 #Wählen als Drehimpuls Masse Verhältnis 0,5
-L = 0.5;
-m = 1;
-LM = L/m;
+LM = 1;
 
 
 #Vaariation der Anfangsbedingungen
@@ -244,9 +248,7 @@ ktheta = -1/2*alpha^2;
 
 
 #Wählen als Drehimpuls Masse Verhältnis 0,5
-L = 0.5;
-m = 1;
-LM = L/m;
+LM = 1;
 
 
 #Vaariation der Anfangsbedingungen
@@ -271,11 +273,6 @@ plot(phobos$theta, phobos$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'
 #dev.off()
 ```
 
-```{r, echo = TRUE, out.width="30%"}
-myimages<-list.files("images/", pattern = ".png", full.names = TRUE)
-knitr::include_graphics(myimages)
-```
-
 
 
 # Fazit
@@ -283,8 +280,6 @@ Wir erhalten bei spezifischen Werten periodisches Verhalten zwischen $\theta$
 und $\dot \theta$. Dies ist im physikalischen Sinne auch nachvollziehbar da in diesen Fällen die Rotationsfrequenz der Eigenrotation über einen rationalen Faktor mit der der Rotation um Mars übereinstimmt.
 
 Wir können aber sehen, dass dieses Verhalten ein Ausnahme Fall ist und wir im allgemeinen ein chaotisches Verhalten vorfinden. (siehe Plots).
-
-
 
 
 \begin{thebibliography}{99}
