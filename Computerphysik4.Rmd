@@ -231,9 +231,10 @@ e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta)
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung2} Entwicklungskurven für $R_0 = 2.9$"}
 library(latex2exp)
+plot(e0$theta%%(2*pi), e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'))
 plot(e0$theta, e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'))
 ```
-Wir finden in Abb. \ref{fig:grundEntwicklung2} ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation.
+Wir finden in Abb. \ref{fig:grundEntwicklung2} ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation. Bzw. bilden sich Bögen an den Rändern des Moduloplots. 
 
 ## Phobos
 Wir verwenden nun die Werte von Phobos, also $\epsilon = 0,015$ und $\alpha = 0,83$. Wir erwarten, dass der varierende Abstand die Eigenrotation im allgemein Fall stören wird und wir somit recht chaotische Plots erhalten können.
@@ -252,17 +253,23 @@ LM = 1;
 
 
 #Vaariation der Anfangsbedingungen
-theta = 0;
+theta1 = 0;
+theta2 = 1;
+theta3 = 2;
 
-thetadot = 0.5;
-thetadot2 = 1;
+thetadot1 = 0.05;
+thetadot2 = 0.1;
+thetadot3 = 0.5;
+thetadot4 = 1;
 
 #Schrittwahl
 h = 0.001
 schritte = 1000000
 
-phobos1 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta)
+phobos1 = durchlauf(schritte, h, phi, r, theta, thetadot1, epsilon, LM, ktheta)
 phobos2 = durchlauf(schritte, h, phi, r, theta, thetadot2, epsilon, LM, ktheta)
+phobos3 = durchlauf(schritte, h, phi, r, theta, thetadot3, epsilon, LM, ktheta)
+phobos4 = durchlauf(schritte, h, phi, r, theta, thetadot4, epsilon, LM, ktheta)
 ```
 
 
@@ -270,10 +277,19 @@ phobos2 = durchlauf(schritte, h, phi, r, theta, thetadot2, epsilon, LM, ktheta)
 library(latex2exp)
 #jpeg(file="saving_plot9.jpeg")
 
-plot(phobos1$theta, phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 0,5,\,\, h=0,0001 $)'))
-plot(phobos2$theta, phobos2$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 1,\,\, h=0,0001 $)'))
 
 
+plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 0,5,\,\, h=0,0001 $)'))
+lines(phobos2$theta%%(2*pi), phobos2$thetadot,"p", col = "dark red")
+lines(phobos3$theta%%(2*pi), phobos3$thetadot,"p", col = "red")
+lines(phobos4$theta%%(2*pi), phobos4$thetadot,"p", col = "pink")
+
+legend(2,1.3,legend=c(TeX(r'($\theta'_0 = 0.01$)'),TeX(r'($\theta'_0 = 0.1$)'),TeX(r'($\theta'_0 = 0.5$)'),TeX(r'($\theta'_0 = 1$)')), col = c("dark blue","dark red","red","pink"), lty=1:1)
+
+plot(phobos1$theta, phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 0,5,\,\, h=0,0001 $)'))
+lines(phobos2$theta, phobos2$thetadot,"p", col = "dark red")
+lines(phobos3$theta, phobos3$thetadot,"p", col = "red")
+lines(phobos4$theta, phobos4$thetadot,"p", col = "pink")
 
 #dev.off()
 ```
