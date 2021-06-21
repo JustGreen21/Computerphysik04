@@ -221,7 +221,7 @@ thetadot = 1;
 h = 0.001
 schritte = 1000000
 
-e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, x0)
+e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta)
 ```
 
 Wir finden in Abb. \ref{fig:grundEntwicklung2} ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation.
@@ -244,7 +244,7 @@ ktheta = -1/2*alpha^2;
 
 
 #Wählen als Drehimpuls Masse Verhältnis 0,5
-L = 0.50;
+L = 0.5;
 m = 1;
 LM = L/m;
 
@@ -257,26 +257,32 @@ thetadot = 1;
 h = 0.001
 schritte = 1000000
 
-phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta, 
-                   x0)
+phobos = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta)
 ```
 
 
 ```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Entwicklungskurven für $R_0 = 2.9$"}
 library(latex2exp)
-plot(phobos$theta, phobos$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'))
+#jpeg(file="saving_plot9.jpeg")
+
+plot(phobos$theta, phobos$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), sub=TeX(r'($L/m = 0,5,\,\, \theta = 10,\,\, \theta' = 10\pi,\,\, h=0,0001 $)'))
+
+
+#dev.off()
+```
+
+```{r, echo = TRUE, out.width="30%"}
+myimages<-list.files("images/", pattern = ".png", full.names = TRUE)
+knitr::include_graphics(myimages)
 ```
 
 
 
-
-
 # Fazit
-Auch wenn wir bei spezifischen Werten Periodisches Verhalten zwischen $\theta$
-und $\dot \theta$ erhalten, wie auch erwartet.
-Jedoch sollte dies nicht wie bei uns gespiegelt. Es scheind das uns eine Fehler bei dem Aufstellen der DGL unterlaufen zu sein,
-den wir nicht finden.
-Wir können aber sehen, dass das bei der Wahl von verschiedenen Anfangsbedingungen chaotisches Verhalten auftritt (siehe Plots).
+Wir erhalten bei spezifischen Werten periodisches Verhalten zwischen $\theta$
+und $\dot \theta$. Dies ist im physikalischen Sinne auch nachvollziehbar da in diesen Fällen die Rotationsfrequenz der Eigenrotation über einen rationalen Faktor mit der der Rotation um Mars übereinstimmt.
+
+Wir können aber sehen, dass dieses Verhalten ein Ausnahme Fall ist und wir im allgemeinen ein chaotisches Verhalten vorfinden. (siehe Plots).
 
 
 
