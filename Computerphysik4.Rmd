@@ -44,7 +44,7 @@ Dabei lässt sich die Differentialgleichung 2.Ordnung auch als 2 Differentialgle
 
 Da $r(t)$ und $\phi(t)$ selbst zeitabhängig sind, müssen wir erst diese lösen, um  die Lösung zu $\theta(t)$ finden zu können.
 
-Nach den Keplerschen Gesetzen erhalten wir die Beziehung:
+Nach den Keplerschen Gesetzen erhalten wir die Beziehung \cite{kepler}:
 \begin{equation}
       r(\phi) = \frac{p}{1+\epsilon \cos{\phi}} = \frac{a (1-\epsilon^2)}{1+\epsilon \cos{\phi}}
 \end{equation}
@@ -244,10 +244,14 @@ plot(e0$theta, e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab
 ```
 
 Wir finden in Abb. \ref{fig:grundEntwicklungXY} ohne Moduloauftragung ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation. Tragen wir es hingegen modulo $2\pi$ auf, so bilden sich die roten Bögen an den Rändern des Moduloplots. Für kleinere Startwerte von der Thetaänderung werden die Radien der Bögen größer, bis sie anschließend im unteren Rand der Grafik Sinuskurven bilden.
+Das sichtbar periodische Verhalten in der Poincaré Abbildung entspricht der Erwartung. 
+Dieser Test zeigt, dass das verwendete Runge-Kutta 2 Verfahren zur numerischen Intergration stabile ist.
+Da nun gezeigt ist, dass das Verfahren hinreichten gut für das Problem ist, werden wir es im folgenden mit den Bedingungen für Phobos benutzen.
 \newpage
 
 ## Phobos
 Wir verwenden nun die Werte von Phobos, also $\epsilon = 0,015$ und $\alpha = 0,83$. Wir erwarten, dass der variierende Abstand die Eigenrotation im allgemeinen Fall stören wird und wir somit recht chaotische Plots erhalten können.
+Wir werden sehen, das unterschiedliche Anfangsbedingungen von $\dot \theta$ teilweise zu chaotischen Verhalten füren.
 
 ```{r, echo=FALSE}
 #Anfangsbedingungen und Konstanten
@@ -283,7 +287,7 @@ phobos4 = durchlauf(schritte, h, phi, r, theta, thetadot4, epsilon, LM, ktheta)
 ```
 
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Phobosbewegung in Moduloauftragung $", fig.width=7,fig.height=4}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Phobosbewegung in Moduloauftragung ", fig.width=7,fig.height=4}
 library(latex2exp)
 
 plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5))
@@ -304,7 +308,7 @@ lines(phobos4$theta, phobos4$thetadot,"p", col = "pink")
 
 In Abb. \ref{fig:grundEntwicklung3} können wir zwei verschiedene periodische Verhalten sehen. Wie bereits im $\epsilon = 0$-Fall finden sich die kleineren $\dot \theta$ im unteren Rand, während große Startänderungen an den Rändern Bögen bilden. Offenkundig haben die Startwerte einen deutlichen Einfluss auf das Verhalten des Mondes. Für die große Anfangsrotationengeschwindigkeiten erhalten wir im Plot ohne Modulo eine scheinbar strukturlose Verteilung. Die sehr kleinen Startrotationen sind hingegen in Sinusformen aufzufinden. Wir habe in Abb \ref{fig:grundEntwicklung4} eine größere Reichweite an Anfangswerten dargestellt, um ein Gefühl für die Verteilung zu gewinnen. Das grün-gelbliche, chaotische Verhalten stellt sich hier bei für $\theta$-Werte in der Größenordnung von 1/7 ein. Dies ist der Bereich, in dem die Schwingung sehr stark gestört wird und keine periodischen Bewegungen durchführt.
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung4} Phobosbewegung für verschiedenste Startrotationen von 1 (rot) bis 1/25 (pink)", fig.width=7,fig.height=4}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung4} Phobosbewegung für verschiedenste Startrotationsgeschwindigkeiten $\dot \theta$ von 1 (rot) bis 1/25 (pink)", fig.width=7,fig.height=4}
 library(latex2exp)
 
 phobos = durchlauf(schritte, h, phi, r, theta, 1, epsilon, LM, ktheta)
@@ -321,3 +325,11 @@ for (x in 1:25){
 Wir erhalten bei den meisten Werten ein nicht chaotisches Verhalten zwischen $\theta$ und $\dot \theta$, können jedoch auch chaotische Situationen konstruieren. Dies ist im physikalischen Sinne auch nachvollziehbar, da die Eigenrotation des Mondes durch geschickt gewählte Bahnen stark von der Radiusvariation beeinflusst werden kann.
 
 Wir können aber sehen, dass dieses Verhalten nicht immer eintritt und wir im Allgemeinen ein strukturiertes Verhalten vorfinden.
+
+
+\begin{thebibliography}{99}
+
+\bibitem{kepler}
+Keplersche Gesetze \url{https://de.wikipedia.org/wiki/Keplersche_Gesetze}, Stand 22.06.2021
+
+\end{thebibliography}
