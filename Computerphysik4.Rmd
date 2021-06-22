@@ -13,11 +13,13 @@ header-includes:
  - \bibliographystyle{unsrtnat}
 ---
 
+[//]: # Ausführbefehl im allgemeinen: ``render("Computerphysik4.Rmd")``
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Im Folgenden wollen wir das Torkeln des Marsmondes Phobos untersuchen, welches durch die Ellipsoideform des Modes und der elliptischen Umlaufbahn um den Mars entsteht.
+Im Folgenden wollen wir das Torkeln des Marsmondes Phobos untersuchen, welches durch die Ellipsoideform des Mondes und der elliptischen Umlaufbahn um den Mars entsteht.
 Dazu beschreiben wir die Situation wie folgt:
 
 Wir nehmen an, dass der Mond Phobos den Mars auf einer festen elliptischen Bahn mit Radius $r(t)$, Polarwinkel $\phi(t)$, großen Halbachse $a$ und Exzentrizität $\epsilon$ in der Umlaufzeit $T$ umkreist.
@@ -42,7 +44,7 @@ Dabei lässt sich die Differentialgleichung 2.Ordnung auch als 2 Differentialgle
 
 Da $r(t)$ und $\phi(t)$ selbst zeitabhängig sind, müssen wir erst diese lösen, um  die Lösung zu $\theta(t)$ finden zu können.
 
-Nach den Keplerschen Gesetzen erhalten wir die Beziehung (QUELLE):
+Nach den Keplerschen Gesetzen erhalten wir die Beziehung:
 \begin{equation}
       r(\phi) = \frac{p}{1+\epsilon \cos{\phi}} = \frac{a (1-\epsilon^2)}{1+\epsilon \cos{\phi}}
 \end{equation}
@@ -61,7 +63,7 @@ Für die zeitliche Ableitung von $r$ ergibt sich mit Hilfe der Gleichungen (\ref
       \dot r = \frac{\partial r}{\partial \phi}\frac{\partial \phi}{\partial t} = \frac{a (1-\epsilon^2)\epsilon \sin{\phi}}{(1+\epsilon \cos{\phi})^2}\frac{L}{M}\frac{1}{r^2}
 \end{equation}
 
-Mit den 4 Differntialgleichung können wir nun $\theta(t)$ und $\dot \theta(t)$ bestimmen ($r$ ist dabei in Einheiten von a).
+Mit den 4 Differentialgleichungen können wir nun $\theta(t)$ und $\dot \theta(t)$ bestimmen ($r$ ist dabei in Einheiten von a).
 
 \begin{equation}
       \frac{\mathrm{d} \phi}{\mathrm{d} t} = \frac{L}{M}\frac{1}{r^2}
@@ -76,7 +78,7 @@ Mit den 4 Differntialgleichung können wir nun $\theta(t)$ und $\dot \theta(t)$ 
       \frac{\mathrm{d}  \dot\theta(t)}{\mathrm{d} t} = -\frac{\alpha^2}{2} (\frac{2\pi}{T})^2 (\frac{1}{r(t)})^3 \sin{2(\theta(t)-\phi(t))}
 \end{equation}
 
-Für die Implementierung werden wir $\tilde{r}$ in Einheiten von $a$ und $\tilde{t}$ in Einheiten von $T/2\pi$. Es ergibt sich mit dem der Abschätzung des mittleren Radius von a und einer annähernd runden Kreisbahn für das Drehimpuls-Masse-Verhältnis die Näherung:
+Für die Implementierung werden wir $\tilde{r}$ in Einheiten von $a$ und $\tilde{t}$ in Einheiten von $T/2\pi$ verwenden. Es ergibt sich mit dem der Abschätzung des mittleren Radius von a und einer annähernd runden Kreisbahn für das Drehimpuls-Masse-Verhältnis die Näherung:
 
 \begin{equation}
 \frac{L}{M} \approx \frac{Ma^2\omega}{M} = \frac{2\pi a^2}{T}
@@ -94,7 +96,7 @@ Um das Differentialgleichungssysteme auszuwerten, verwenden wir das Runge-Kutta 
 
 Wobei sich unser f aus den vier Anteilen von $\phi$, $r$, $\theta$ und $\dot \theta$ zusammensetzt.
 
-Dabei bietet uns das Runge-Kutter Verfahren numerische Stabilität (soweit das System selbst Stabile ist) und weist mit einem Verfahrensfehler von $\mathcal{O}(h^2)$ einen kleineren Fehler als das Eulerverfahren auf für kleinen Schrittweiten h.
+Dabei bietet uns das Runge-Kutta Verfahren numerische Stabilität (soweit das System selbst stabil ist) und weist mit einem Verfahrensfehler von $\mathcal{O}(h^2)$ einen kleineren Fehler als das Eulerverfahren auf für kleine Schrittweiten h.
 
 # Implementation des DGS nach dem Runge-Kutta 2 Verfahren
 
@@ -200,7 +202,7 @@ Rcpp::List durchlauf(const int maxSchritte, const double h,
 
 
 ## Kreisbahn
-Für eine Exzentrizität von 0 erwarten wir eine gleichmäßige Eigenrotation, also ein Sinusverlauf.
+Für eine Exzentrizität von 0 erwarten wir eine gleichmäßige Eigenrotation, da der Marsmond durchgehend unter dem selben Einfluss des Planeten ist.
 ```{r, echo=FALSE}
 #Anfangsbedingungen und Konstanten
 
@@ -228,16 +230,24 @@ e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta)
 ```
 
 
-
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung2} Entwicklungskurven für $R_0 = 2.9$"}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklungXY} Kreisbewegung in Moduloauftragung ", fig.width=7,fig.height=4}
 library(latex2exp)
-plot(e0$theta%%(2*pi), e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'))
+plot(e0$theta%%(2*pi), e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5))
+for (x in 1:25){
+  e0 = durchlauf(schritte, h, phi, r, theta, 1/x, epsilon, LM, ktheta)
+  lines(e0$theta%%(2*pi), e0$thetadot,"p", col = rainbow(25)[x])
+}
+```
+
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3XX} Kreisbewegung", fig.width=7,fig.height=4}
 plot(e0$theta, e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'))
 ```
-Wir finden in Abb. \ref{fig:grundEntwicklung2} ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation. Bzw. bilden sich Bögen an den Rändern des Moduloplots. 
+
+Wir finden in Abb. \ref{fig:grundEntwicklungXY} ohne Moduloauftragung ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation. Tragen wir es hingegen modulo $2\pi$ auf, so bilden sich die roten Bögen an den Rändern des Moduloplots. Für kleinere Startwerte von der Thetaänderung werden die Radien der Bögen größer, bis sie anschließend im unteren Rand der Grafik Sinuskurven bilden.
+\newpage
 
 ## Phobos
-Wir verwenden nun die Werte von Phobos, also $\epsilon = 0,015$ und $\alpha = 0,83$. Wir erwarten, dass der varierende Abstand die Eigenrotation im allgemein Fall stören wird und wir somit recht chaotische Plots erhalten können.
+Wir verwenden nun die Werte von Phobos, also $\epsilon = 0,015$ und $\alpha = 0,83$. Wir erwarten, dass der variierende Abstand die Eigenrotation im allgemeinen Fall stören wird und wir somit recht chaotische Plots erhalten können.
 
 ```{r, echo=FALSE}
 #Anfangsbedingungen und Konstanten
@@ -273,30 +283,32 @@ phobos4 = durchlauf(schritte, h, phi, r, theta, thetadot4, epsilon, LM, ktheta)
 ```
 
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Entwicklungskurven für $R_0 = 2.9$"}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Phobosbewegung in Moduloauftragung $", fig.width=7,fig.height=4}
 library(latex2exp)
 
-plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 0,5,\,\, h=0,0001 $)'))
+plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5))
 lines(phobos2$theta%%(2*pi), phobos2$thetadot,"p", col = "dark red")
 lines(phobos3$theta%%(2*pi), phobos3$thetadot,"p", col = "red")
 lines(phobos4$theta%%(2*pi), phobos4$thetadot,"p", col = "pink")
 
-legend(2,1.3,legend=c(TeX(r'($\theta'_0 = 0.01$)'),TeX(r'($\theta'_0 = 0.1$)'),TeX(r'($\theta'_0 = 0.5$)'),TeX(r'($\theta'_0 = 1$)')), col = c("dark blue","dark red","red","pink"), lty=1:1)
+legend(2.25,1.4,legend=c(TeX(r'($\theta'_0 = 0.01$)'),TeX(r'($\theta'_0 = 0.1$)'),TeX(r'($\theta'_0 = 0.5$)'),TeX(r'($\theta'_0 = 1$)')), col = c("dark blue","dark red","red","pink"), lty=1:1)
+```
 
-plot(phobos1$theta, phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 0,5,\,\, h=0,0001 $)'))
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3b} Phobosbewegung", fig.width=7,fig.height=4}
+plot(phobos1$theta, phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5))
 lines(phobos2$theta, phobos2$thetadot,"p", col = "dark red")
 lines(phobos3$theta, phobos3$thetadot,"p", col = "red")
 lines(phobos4$theta, phobos4$thetadot,"p", col = "pink")
 
 ```
 
-In Abb. \ref{fig:grundEntwicklung3} können wir sowohl ein periodisches Verhalten, als auch ein chaotisches Verhalten sehen. Offenkundig haben die Startwerte einen deutlichen Einfluss auf das Verhalten des Mondes. Für die große Anfangsrotationengeschwindigkeiten erhalten wir die rötlich eingetragenen Ränder, welche im Plot ohne Modulo kaum Struktur tragen. Die sehr kleinen Startrotationen sind hingegen am unteren Rand der Grafik in Sinusformen aufzufinden. Wir habe in Abb \ref{fig:grundEntwicklung4} eine größere Reichweite an Anfangswerten dargestellt um ein Gefühl für die Verteilung zu gewinnen. Das grün gelbliche chaotische Verhalten stellt sich hier bei für $\theta$-Werte in der Größenordnung von 1/7 ein.
+In Abb. \ref{fig:grundEntwicklung3} können wir zwei verschiedene periodische Verhalten sehen. Wie bereits im $\epsilon = 0$-Fall finden sich die kleineren $\dot \theta$ im unteren Rand, während große Startänderungen an den Rändern Bögen bilden. Offenkundig haben die Startwerte einen deutlichen Einfluss auf das Verhalten des Mondes. Für die große Anfangsrotationengeschwindigkeiten erhalten wir im Plot ohne Modulo eine scheinbar strukturlose Verteilung. Die sehr kleinen Startrotationen sind hingegen in Sinusformen aufzufinden. Wir habe in Abb \ref{fig:grundEntwicklung4} eine größere Reichweite an Anfangswerten dargestellt, um ein Gefühl für die Verteilung zu gewinnen. Das grün-gelbliche, chaotische Verhalten stellt sich hier bei für $\theta$-Werte in der Größenordnung von 1/7 ein. Dies ist der Bereich, in dem die Schwingung sehr stark gestört wird und keine periodischen Bewegungen durchführt.
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung4} Entwicklungskurven für $R_0 = 2.9$"}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung4} Phobosbewegung für verschiedenste Startrotationen von 1 (rot) bis 1/25 (pink)", fig.width=7,fig.height=4}
 library(latex2exp)
 
 phobos = durchlauf(schritte, h, phi, r, theta, 1, epsilon, LM, ktheta)
-plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5), sub=TeX(r'($\theta_0 = 0,\,\, \theta'_0 = 0,5,\,\, h=0,0001 $)'))
+plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5))
 
 for (x in 1:25){
   phobos = durchlauf(schritte, h, phi, r, theta, 1/x, epsilon, LM, ktheta)
@@ -306,11 +318,6 @@ for (x in 1:25){
 ```
 
 # Fazit
-Wir erhalten bei spezifischen Werten periodisches Verhalten zwischen $\theta$ und $\dot \theta$. Dies ist im physikalischen Sinne auch nachvollziehbar da in diesen Fällen die Rotationsfrequenz der Eigenrotation über einen rationalen Faktor mit der der Rotation um Mars übereinstimmt.
+Wir erhalten bei den meisten Werten ein nicht chaotisches Verhalten zwischen $\theta$ und $\dot \theta$, können jedoch auch chaotische Situationen konstruieren. Dies ist im physikalischen Sinne auch nachvollziehbar, da die Eigenrotation des Mondes durch geschickt gewählte Bahnen stark von der Radiusvariation beeinflusst werden kann.
 
-Wir können aber sehen, dass dieses Verhalten nicht immer eintritt und wir im Allgemeinen ein chaotisches Verhalten vorfinden.
-
-
-\begin{thebibliography}{99}
-
-\end{thebibliography}
+Wir können aber sehen, dass dieses Verhalten nicht immer eintritt und wir im Allgemeinen ein strukturiertes Verhalten vorfinden.
