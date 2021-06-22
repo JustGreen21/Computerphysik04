@@ -230,7 +230,7 @@ e0 = durchlauf(schritte, h, phi, r, theta, thetadot, epsilon, LM, ktheta)
 ```
 
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklungXY} Kreisbewegung in Moduloauftragung ", fig.width=7,fig.height=4}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklungXY} Kreisrotation", fig.width=7,fig.height=4}
 library(latex2exp)
 plot(e0$theta%%(2*pi), e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5))
 for (x in 1:25){
@@ -239,19 +239,19 @@ for (x in 1:25){
 }
 ```
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3XX} Kreisbewegung", fig.width=7,fig.height=4}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3XX} Kreisrotation für verschiedenste Startrotationsgeschwindigkeiten von 1 (rot) bis 1/25 (pink)", fig.width=7,fig.height=4}
 plot(e0$theta, e0$thetadot, "p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'))
 ```
 
 Wir finden in Abb. \ref{fig:grundEntwicklungXY} ohne Moduloauftragung ein sinusförmiges, regelmäßiges Verhalten der Eigenrotation. Tragen wir es hingegen modulo $2\pi$ auf, so bilden sich die roten Bögen an den Rändern des Moduloplots. Für kleinere Startwerte von der Thetaänderung werden die Radien der Bögen größer, bis sie anschließend im unteren Rand der Grafik Sinuskurven bilden.
 Das sichtbar periodische Verhalten in der Poincaré Abbildung entspricht der Erwartung. 
 Dieser Test zeigt, dass das verwendete Runge-Kutta 2 Verfahren zur numerischen Intergration stabile ist.
-Da nun gezeigt ist, dass das Verfahren hinreichten gut für das Problem ist, werden wir es im folgenden mit den Bedingungen für Phobos benutzen.
+Da nun gezeigt ist, dass das Verfahren hinreichten gut für das Problem ist, werden wir es im Folgenden mit den Bedingungen für Phobos benutzen.
 \newpage
 
 ## Phobos
 Wir verwenden nun die Werte von Phobos, also $\epsilon = 0,015$ und $\alpha = 0,83$. Wir erwarten, dass der variierende Abstand die Eigenrotation im allgemeinen Fall stören wird und wir somit recht chaotische Plots erhalten können.
-Wir werden sehen, das unterschiedliche Anfangsbedingungen von $\dot \theta$ teilweise zu chaotischen Verhalten füren.
+Wir werden sehen, das unterschiedliche Anfangsbedingungen von $\dot \theta$ zu chaotischen Verhalten führen können.
 
 ```{r, echo=FALSE}
 #Anfangsbedingungen und Konstanten
@@ -287,7 +287,7 @@ phobos4 = durchlauf(schritte, h, phi, r, theta, thetadot4, epsilon, LM, ktheta)
 ```
 
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Phobosbewegung in Moduloauftragung ", fig.width=7,fig.height=4}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3} Phobosrotation in Moduloauftragung ", fig.width=7,fig.height=4}
 library(latex2exp)
 
 plot(phobos1$theta%%(2*pi), phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5))
@@ -298,7 +298,7 @@ lines(phobos4$theta%%(2*pi), phobos4$thetadot,"p", col = "pink")
 legend(2.25,1.4,legend=c(TeX(r'($\theta'_0 = 0.01$)'),TeX(r'($\theta'_0 = 0.1$)'),TeX(r'($\theta'_0 = 0.5$)'),TeX(r'($\theta'_0 = 1$)')), col = c("dark blue","dark red","red","pink"), lty=1:1)
 ```
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3b} Phobosbewegung", fig.width=7,fig.height=4}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung3b} Phobosrotation", fig.width=7,fig.height=4}
 plot(phobos1$theta, phobos1$thetadot,"p", col = "dark blue",xlab=TeX(r'($\theta$)'), ylab = TeX(r'($T d_t \theta  / 2 \pi$)'), ylim=c(0, 1.5))
 lines(phobos2$theta, phobos2$thetadot,"p", col = "dark red")
 lines(phobos3$theta, phobos3$thetadot,"p", col = "red")
@@ -306,9 +306,9 @@ lines(phobos4$theta, phobos4$thetadot,"p", col = "pink")
 
 ```
 
-In Abb. \ref{fig:grundEntwicklung3} können wir zwei verschiedene periodische Verhalten sehen. Wie bereits im $\epsilon = 0$-Fall finden sich die kleineren $\dot \theta$ im unteren Rand, während große Startänderungen an den Rändern Bögen bilden. Offenkundig haben die Startwerte einen deutlichen Einfluss auf das Verhalten des Mondes. Für die große Anfangsrotationengeschwindigkeiten erhalten wir im Plot ohne Modulo eine scheinbar strukturlose Verteilung. Die sehr kleinen Startrotationen sind hingegen in Sinusformen aufzufinden. Wir habe in Abb \ref{fig:grundEntwicklung4} eine größere Reichweite an Anfangswerten dargestellt, um ein Gefühl für die Verteilung zu gewinnen. Das grün-gelbliche, chaotische Verhalten stellt sich hier bei für $\theta$-Werte in der Größenordnung von 1/7 ein. Dies ist der Bereich, in dem die Schwingung sehr stark gestört wird und keine periodischen Bewegungen durchführt.
+In Abb. \ref{fig:grundEntwicklung3} können wir zwei verschiedene periodische Verhalten sehen. Wie bereits im $\epsilon = 0$-Fall finden sich die kleineren $\dot \theta$ im unteren Rand, während große Startänderungen an den Rändern Bögen bilden. Offenkundig haben die Startwerte einen deutlichen Einfluss auf das Verhalten des Mondes. Für die große Anfangsrotationengeschwindigkeiten erhalten wir im Plot ohne Modulo eine scheinbar strukturlose Verteilung. Die sehr kleinen Startrotationen sind hingegen in Sinusformen aufzufinden. Wir habe in Abb. \ref{fig:grundEntwicklung4} eine größere Reichweite an Anfangswerten dargestellt, um ein Gefühl für die Verteilung zu gewinnen. Das grün-gelbliche, chaotische Verhalten stellt sich hier bei für $\theta$-Werte in der Größenordnung von 1/7 ein. Dies ist der Bereich, in dem die Schwingung sehr stark gestört wird und keine periodischen Bewegungen durchführt.
 
-```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung4} Phobosbewegung für verschiedenste Startrotationsgeschwindigkeiten $\dot \theta$ von 1 (rot) bis 1/25 (pink)", fig.width=7,fig.height=4}
+```{r, echo=FALSE, fig.cap="\\label{fig:grundEntwicklung4} Phobosrotation für verschiedenste Startrotationsgeschwindigkeiten von 1 (rot) bis 1/25 (pink)", fig.width=7,fig.height=4}
 library(latex2exp)
 
 phobos = durchlauf(schritte, h, phi, r, theta, 1, epsilon, LM, ktheta)
